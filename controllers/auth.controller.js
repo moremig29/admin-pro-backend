@@ -92,7 +92,6 @@ const googleSignIn = async ( req, res = response ) => {
       msg: 'token de google incorrecto'
     });
   }
-
 }
 
 module.exports = {

@@ -1,9 +1,8 @@
 const { response } = require('express');
-const bcrypt = require('bcryptjs');
 
 const Medico = require('../models/medico.model');
 
-const getMedicos = async ( req, res ) => {
+const getMedicos = async ( req, res = response ) => {
 
   const medicos = await Medico.find()
                               .populate('usuario', 'nombre img')
@@ -15,7 +14,7 @@ const getMedicos = async ( req, res ) => {
   });
 
 }
-const crearMedico = async ( req, res ) => {
+const crearMedico = async ( req, res = response ) => {
 
   const uid = req.uid;
   const medico = new Medico({ 
@@ -43,20 +42,75 @@ const crearMedico = async ( req, res ) => {
 
   
 }
-const actualizarMedico = ( req, res ) => {
+const actualizarMedico = async ( req, res = response ) => {
 
+  const uid = req.uid;
+  const id = req.params.id
+
+  try {
+
+    const medicoDB = await Medico.findById( id );
+
+    if ( !medicoDB ) {
+      res.json.status(404)({
+        ok: false,
+        msg: 'Médico no encontrado'
+      });
+    }
+
+    const cambiosMedico = {
+      ...req.body,
+      usuario: uid
+    }
+
+    const medicoActualizado = await Medico.findByIdAndUpdate( id, cambiosMedico, { new: true } );
+
+    
     res.json({
-    ok: true,
-    msg: 'actualizar medico'
-  });
+      ok: true,
+      msg: 'actualizar medico',
+      medico: medicoActualizado
+    });
+
+  } catch (error) {
+    console.log( error );
+    res.json.status(500)({
+      ok: false,
+      msg: 'Contacte al administrador'
+    });
+  }
   
 }
-const borrarMedico = ( req, res ) => {
+const borrarMedico = async ( req, res = response ) => {
 
+  const id = req.params.id
+
+  try {
+
+    const medicoDB = await Medico.findById( id );
+
+    if ( !medicoDB ) {
+      res.json.status(404)({
+        ok: false,
+        msg: 'Médico no encontrado'
+      });
+    }
+
+    const medicoEliminado = await Medico.findByIdAndDelete( id );
+
+    
     res.json({
-    ok: true,
-    msg: 'borrar medico'
-  });
+      ok: true,
+      msg: 'Médico eliminado'
+    });
+
+  } catch (error) {
+    console.log( error );
+    res.json.status(500)({
+      ok: false,
+      msg: 'Contacte al administrador'
+    });
+  }
   
 }
 

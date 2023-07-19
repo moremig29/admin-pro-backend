@@ -87,7 +87,6 @@ const actualizarUsuario = async ( req, res = response ) => {
       ok: false,
       msg: 'no existe un usuario por ese id'
     });
-
     }
 
     // Actualizaciones
@@ -104,10 +103,16 @@ const actualizarUsuario = async ( req, res = response ) => {
       }
     }
 
-    campos.email = email;
+    if ( !usuarioDB.google ) {
+      campos.email = email;
+    } else if ( usuarioDB.email !== email ) {
+      return res.status( 400 ).json({
+      ok: false,
+      msg: 'Usuario de google no puede modificar su correo'
+    });
+    }
 
     const usuarioActualizado = await Usuario.findByIdAndUpdate( uid, campos, { new: true } );
-
 
     res.json({
       ok: true,
